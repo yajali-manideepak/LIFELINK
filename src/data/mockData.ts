@@ -5,12 +5,14 @@ import {
   BloodInventory,
   BloodRequest,
   AuditLog,
-  User
+  User,
+  SystemConfig,
+  PlatformAdmin
 } from '../types/lifelink';
 
 export const DEMO_NOTICE = 'DEMO DATA — NOT REAL MEDICAL INVENTORY. For simulation and workflow demonstration only.';
 
-// Active Users for fast switching
+// Active Users for fast switching (Section 4 & 4a)
 export const MOCK_USERS: User[] = [
   {
     id: 'usr_hosp_1',
@@ -23,7 +25,7 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: 'usr_donor_ravi',
-    name: 'Ravi Kumar',
+    name: 'DEMO_Ravi Kumar',
     phone: '+91 98765 43210',
     phone_verified: true,
     role: 'DONOR',
@@ -32,7 +34,7 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: 'usr_donor_priya',
-    name: 'Priya Sharma',
+    name: 'DEMO_Priya Sharma',
     phone: '+91 98112 34567',
     phone_verified: true,
     role: 'DONOR',
@@ -56,6 +58,84 @@ export const MOCK_USERS: User[] = [
     role: 'BLOOD_CENTRE_STAFF',
     created_at: '2026-01-08T11:00:00Z',
     status: 'ACTIVE',
+  },
+  {
+    id: 'usr_admin_1',
+    name: 'S. K. Verma (Platform Administrator)',
+    phone: '+91 99000 11222',
+    phone_verified: true,
+    role: 'PLATFORM_ADMIN',
+    created_at: '2026-01-01T00:00:00Z',
+    status: 'ACTIVE',
+  }
+];
+
+export const MOCK_PLATFORM_ADMINS: PlatformAdmin[] = [
+  {
+    id: 'adm_001',
+    user_id: 'usr_admin_1',
+    permission_level: 'SUPER',
+    created_at: '2026-01-01T00:00:00Z',
+    created_by: null
+  }
+];
+
+export const MOCK_SYSTEM_CONFIG: SystemConfig[] = [
+  {
+    id: 'cfg_01',
+    config_key: 'DONOR_NOTIFICATION_TIMEOUT_MINUTES',
+    config_value: '7',
+    description: 'Period before unanswered donor notification transitions to NO_RESPONSE',
+    updated_by: 'adm_001',
+    updated_at: '2026-01-01T00:00:00Z'
+  },
+  {
+    id: 'cfg_02',
+    config_key: 'DUPLICATE_REQUEST_WINDOW_MINUTES',
+    config_value: '30',
+    description: 'Window to flag identical hospital blood requests as potential duplicates',
+    updated_by: 'adm_001',
+    updated_at: '2026-01-01T00:00:00Z'
+  },
+  {
+    id: 'cfg_03',
+    config_key: 'INVENTORY_FRESHNESS_THRESHOLD_MINUTES',
+    config_value: '30',
+    description: 'Threshold after which blood inventory is flagged as STALE',
+    updated_by: 'adm_001',
+    updated_at: '2026-01-01T00:00:00Z'
+  },
+  {
+    id: 'cfg_04',
+    config_key: 'DONOR_RENOTIFICATION_QUIET_PERIOD_MINUTES',
+    config_value: '60',
+    description: 'Minimum quiet period before a donor may be re-notified for the same request',
+    updated_by: 'adm_001',
+    updated_at: '2026-01-01T00:00:00Z'
+  },
+  {
+    id: 'cfg_05',
+    config_key: 'MOBILISATION_TIER_1_RADIUS_KM',
+    config_value: '5',
+    description: 'Tier 1 donor mobilisation radius in kilometers',
+    updated_by: 'adm_001',
+    updated_at: '2026-01-01T00:00:00Z'
+  },
+  {
+    id: 'cfg_06',
+    config_key: 'MOBILISATION_TIER_2_RADIUS_KM',
+    config_value: '10',
+    description: 'Tier 2 donor mobilisation radius in kilometers',
+    updated_by: 'adm_001',
+    updated_at: '2026-01-01T00:00:00Z'
+  },
+  {
+    id: 'cfg_07',
+    config_key: 'MOBILISATION_TIER_3_RADIUS_KM',
+    config_value: '20',
+    description: 'Tier 3 donor mobilisation radius in kilometers',
+    updated_by: 'adm_001',
+    updated_at: '2026-01-01T00:00:00Z'
   }
 ];
 
@@ -98,7 +178,7 @@ export const MOCK_BLOOD_CENTRES: BloodCentre[] = [
     contact_phone: '+91 8647 224455',
     license_number: 'AP/PAL/BB/2024/09',
     district: 'Palnadu',
-    last_inventory_sync: new Date(Date.now() - 3 * 60 * 1000).toISOString(), // 3 mins ago
+    last_inventory_sync: new Date(Date.now() - 3 * 60 * 1000).toISOString(),
   },
   {
     id: 'bc_guntur',
@@ -111,11 +191,11 @@ export const MOCK_BLOOD_CENTRES: BloodCentre[] = [
     contact_phone: '+91 863 2233445',
     license_number: 'AP/GTR/BB/2023/14',
     district: 'Guntur',
-    last_inventory_sync: new Date(Date.now() - 7 * 60 * 1000).toISOString(), // 7 mins ago
+    last_inventory_sync: new Date(Date.now() - 7 * 60 * 1000).toISOString(),
   }
 ];
 
-// Synthetic Blood Inventory - Verified Blood Units with component-specific storage & expiry
+// Synthetic Blood Inventory (§45)
 export const MOCK_INITIAL_INVENTORY: BloodInventory[] = [
   // Narasaraopet Blood Centre (BC A)
   {
@@ -126,8 +206,9 @@ export const MOCK_INITIAL_INVENTORY: BloodInventory[] = [
     blood_group: 'O+',
     units: 2,
     reserved_units: 0,
+    version: 1,
     collection_date: '2026-09-18T10:00:00Z',
-    expiry_date: '2026-10-30T10:00:00Z', // 42 days for PRBC at 2-6°C
+    expiry_date: '2026-10-30T10:00:00Z',
     storage_condition: '2°C to 6°C (Refrigerated Blood Bank Refrigerator)',
     screening_status: 'TESTED_CLEARED',
     inventory_status: 'AVAILABLE',
@@ -141,6 +222,7 @@ export const MOCK_INITIAL_INVENTORY: BloodInventory[] = [
     blood_group: 'A+',
     units: 4,
     reserved_units: 0,
+    version: 1,
     collection_date: '2026-09-20T08:30:00Z',
     expiry_date: '2026-11-01T08:30:00Z',
     storage_condition: '2°C to 6°C',
@@ -156,8 +238,9 @@ export const MOCK_INITIAL_INVENTORY: BloodInventory[] = [
     blood_group: 'B+',
     units: 3,
     reserved_units: 0,
+    version: 1,
     collection_date: '2026-09-23T11:00:00Z',
-    expiry_date: '2026-09-28T11:00:00Z', // 5 days shelf life
+    expiry_date: '2026-09-28T11:00:00Z',
     storage_condition: '20°C to 24°C with continuous flat-bed agitation',
     screening_status: 'TESTED_CLEARED',
     inventory_status: 'AVAILABLE',
@@ -171,8 +254,9 @@ export const MOCK_INITIAL_INVENTORY: BloodInventory[] = [
     blood_group: 'O+',
     units: 5,
     reserved_units: 0,
+    version: 1,
     collection_date: '2026-08-15T09:00:00Z',
-    expiry_date: '2027-08-15T09:00:00Z', // 1 year frozen
+    expiry_date: '2027-08-15T09:00:00Z',
     storage_condition: '-30°C or colder (Ultra-low Deep Freezer)',
     screening_status: 'TESTED_CLEARED',
     inventory_status: 'AVAILABLE',
@@ -188,6 +272,7 @@ export const MOCK_INITIAL_INVENTORY: BloodInventory[] = [
     blood_group: 'O+',
     units: 1,
     reserved_units: 0,
+    version: 1,
     collection_date: '2026-09-19T14:00:00Z',
     expiry_date: '2026-10-31T14:00:00Z',
     storage_condition: '2°C to 6°C',
@@ -203,12 +288,13 @@ export const MOCK_INITIAL_INVENTORY: BloodInventory[] = [
     blood_group: 'O-',
     units: 1,
     reserved_units: 0,
+    version: 1,
     collection_date: '2026-09-21T16:00:00Z',
     expiry_date: '2026-11-02T16:00:00Z',
     storage_condition: '2°C to 6°C',
     screening_status: 'TESTED_CLEARED',
     inventory_status: 'AVAILABLE',
-    last_updated: new Date(Date.now() - 50 * 60 * 1000).toISOString(), // Stale > 45 mins!
+    last_updated: new Date(Date.now() - 50 * 60 * 1000).toISOString(), // Stale > 30 mins
   },
   {
     id: 'inv_gun_plt_o_pos_1',
@@ -218,6 +304,7 @@ export const MOCK_INITIAL_INVENTORY: BloodInventory[] = [
     blood_group: 'O+',
     units: 2,
     reserved_units: 0,
+    version: 1,
     collection_date: '2026-09-24T09:00:00Z',
     expiry_date: '2026-09-29T09:00:00Z',
     storage_condition: '20°C to 24°C agitated',
@@ -227,13 +314,13 @@ export const MOCK_INITIAL_INVENTORY: BloodInventory[] = [
   }
 ];
 
-// 25+ Synthetic Registered Voluntary Donors distributed across distance tiers (0-5km, 5-10km, 10-20km, 20km+)
+// 25+ Synthetic Registered Voluntary Donors (§45)
 export const MOCK_DONORS: Donor[] = [
   // Tier 1 (0-5 km)
   {
     id: 'dn_01_ravi',
     user_id: 'usr_donor_ravi',
-    name: 'Ravi Kumar',
+    name: 'DEMO_Ravi Kumar',
     phone: '+91 98765 •••••',
     blood_group: 'O+',
     gender: 'MALE',
@@ -241,8 +328,9 @@ export const MOCK_DONORS: Donor[] = [
     approximate_longitude: 80.0580,
     approximate_distance_km: 2.3,
     availability: true,
-    last_donation_date: '2026-05-10', // > 90 days
-    eligibility_status: 'ELIGIBLE',
+    last_donation_date: '2026-05-10',
+    account_status: 'ACTIVE',
+    eligibility_status: 'CENTRE_CONFIRMED_ELIGIBLE',
     preferred_blood_centre_id: 'bc_narasaraopet',
     donations_count: 4,
     created_at: '2026-01-10T10:00:00Z',
@@ -250,7 +338,7 @@ export const MOCK_DONORS: Donor[] = [
   {
     id: 'dn_02_priya',
     user_id: 'usr_donor_priya',
-    name: 'Priya Sharma',
+    name: 'DEMO_Priya Sharma',
     phone: '+91 98112 •••••',
     blood_group: 'O+',
     gender: 'FEMALE',
@@ -258,8 +346,9 @@ export const MOCK_DONORS: Donor[] = [
     approximate_longitude: 80.0620,
     approximate_distance_km: 3.4,
     availability: true,
-    last_donation_date: '2026-04-12', // > 120 days for female
-    eligibility_status: 'ELIGIBLE',
+    last_donation_date: '2026-04-12',
+    account_status: 'ACTIVE',
+    eligibility_status: 'CENTRE_CONFIRMED_ELIGIBLE',
     preferred_blood_centre_id: 'bc_narasaraopet',
     donations_count: 2,
     created_at: '2026-01-12T11:00:00Z',
@@ -267,7 +356,7 @@ export const MOCK_DONORS: Donor[] = [
   {
     id: 'dn_03_karthik',
     user_id: 'usr_donor_karthik',
-    name: 'Karthik Reddy',
+    name: 'DEMO_Karthik Reddy',
     phone: '+91 94901 •••••',
     blood_group: 'O+',
     gender: 'MALE',
@@ -276,7 +365,8 @@ export const MOCK_DONORS: Donor[] = [
     approximate_distance_km: 4.1,
     availability: true,
     last_donation_date: '2026-06-01',
-    eligibility_status: 'ELIGIBLE',
+    account_status: 'ACTIVE',
+    eligibility_status: 'CENTRE_CONFIRMED_ELIGIBLE',
     preferred_blood_centre_id: 'bc_narasaraopet',
     donations_count: 6,
     created_at: '2026-01-14T09:30:00Z',
@@ -284,7 +374,7 @@ export const MOCK_DONORS: Donor[] = [
   {
     id: 'dn_04_deepa',
     user_id: 'usr_donor_deepa',
-    name: 'Deepa V.',
+    name: 'DEMO_Deepa V.',
     phone: '+91 97003 •••••',
     blood_group: 'A+',
     gender: 'FEMALE',
@@ -293,7 +383,8 @@ export const MOCK_DONORS: Donor[] = [
     approximate_distance_km: 1.8,
     availability: true,
     last_donation_date: '2026-03-20',
-    eligibility_status: 'ELIGIBLE',
+    account_status: 'ACTIVE',
+    eligibility_status: 'CENTRE_CONFIRMED_ELIGIBLE',
     preferred_blood_centre_id: 'bc_narasaraopet',
     donations_count: 1,
     created_at: '2026-02-01T14:15:00Z',
@@ -301,7 +392,7 @@ export const MOCK_DONORS: Donor[] = [
   {
     id: 'dn_05_venkat',
     user_id: 'usr_donor_venkat',
-    name: 'Venkat Subbaiah',
+    name: 'DEMO_Venkat Subbaiah',
     phone: '+91 99887 •••••',
     blood_group: 'O+',
     gender: 'MALE',
@@ -310,7 +401,8 @@ export const MOCK_DONORS: Donor[] = [
     approximate_distance_km: 4.8,
     availability: true,
     last_donation_date: '2026-05-25',
-    eligibility_status: 'ELIGIBLE',
+    account_status: 'ACTIVE',
+    eligibility_status: 'CENTRE_CONFIRMED_ELIGIBLE',
     preferred_blood_centre_id: 'bc_narasaraopet',
     donations_count: 3,
     created_at: '2026-02-05T16:00:00Z',
@@ -320,7 +412,7 @@ export const MOCK_DONORS: Donor[] = [
   {
     id: 'dn_06_srinivas',
     user_id: 'usr_donor_srini',
-    name: 'Srinivas G.',
+    name: 'DEMO_Srinivas G.',
     phone: '+91 91234 •••••',
     blood_group: 'O+',
     gender: 'MALE',
@@ -329,7 +421,8 @@ export const MOCK_DONORS: Donor[] = [
     approximate_distance_km: 6.8,
     availability: true,
     last_donation_date: '2026-02-14',
-    eligibility_status: 'ELIGIBLE',
+    account_status: 'ACTIVE',
+    eligibility_status: 'CENTRE_CONFIRMED_ELIGIBLE',
     preferred_blood_centre_id: 'bc_narasaraopet',
     donations_count: 5,
     created_at: '2026-01-20T10:45:00Z',
@@ -337,7 +430,7 @@ export const MOCK_DONORS: Donor[] = [
   {
     id: 'dn_07_ananya',
     user_id: 'usr_donor_ananya',
-    name: 'Ananya Roy',
+    name: 'DEMO_Ananya Roy',
     phone: '+91 99445 •••••',
     blood_group: 'O+',
     gender: 'FEMALE',
@@ -346,7 +439,8 @@ export const MOCK_DONORS: Donor[] = [
     approximate_distance_km: 8.5,
     availability: true,
     last_donation_date: '2026-01-05',
-    eligibility_status: 'ELIGIBLE',
+    account_status: 'ACTIVE',
+    eligibility_status: 'CENTRE_CONFIRMED_ELIGIBLE',
     preferred_blood_centre_id: 'bc_narasaraopet',
     donations_count: 2,
     created_at: '2026-01-25T12:00:00Z',
@@ -354,7 +448,7 @@ export const MOCK_DONORS: Donor[] = [
   {
     id: 'dn_08_manoj',
     user_id: 'usr_donor_manoj',
-    name: 'Manoj Krishna',
+    name: 'DEMO_Manoj Krishna',
     phone: '+91 98855 •••••',
     blood_group: 'B+',
     gender: 'MALE',
@@ -363,7 +457,8 @@ export const MOCK_DONORS: Donor[] = [
     approximate_distance_km: 9.2,
     availability: true,
     last_donation_date: '2026-06-15',
-    eligibility_status: 'ELIGIBLE',
+    account_status: 'ACTIVE',
+    eligibility_status: 'CENTRE_CONFIRMED_ELIGIBLE',
     preferred_blood_centre_id: 'bc_narasaraopet',
     donations_count: 4,
     created_at: '2026-02-01T08:00:00Z',
@@ -371,16 +466,17 @@ export const MOCK_DONORS: Donor[] = [
   {
     id: 'dn_09_lakshmi',
     user_id: 'usr_donor_lakshmi',
-    name: 'Lakshmi Narayana',
+    name: 'DEMO_Lakshmi Narayana',
     phone: '+91 97766 •••••',
     blood_group: 'O+',
     gender: 'FEMALE',
     approximate_latitude: 16.2820,
     approximate_longitude: 80.1400,
     approximate_distance_km: 9.7,
-    availability: false, // currently toggled unavailable
+    availability: false,
     last_donation_date: '2026-03-10',
-    eligibility_status: 'ELIGIBLE',
+    account_status: 'ACTIVE',
+    eligibility_status: 'CENTRE_CONFIRMED_ELIGIBLE',
     preferred_blood_centre_id: 'bc_narasaraopet',
     donations_count: 1,
     created_at: '2026-02-03T17:30:00Z',
@@ -390,7 +486,7 @@ export const MOCK_DONORS: Donor[] = [
   {
     id: 'dn_10_naresh',
     user_id: 'usr_donor_naresh',
-    name: 'Naresh Chowdary',
+    name: 'DEMO_Naresh Chowdary',
     phone: '+91 96655 •••••',
     blood_group: 'O+',
     gender: 'MALE',
@@ -399,7 +495,8 @@ export const MOCK_DONORS: Donor[] = [
     approximate_distance_km: 14.5,
     availability: true,
     last_donation_date: '2026-05-18',
-    eligibility_status: 'ELIGIBLE',
+    account_status: 'ACTIVE',
+    eligibility_status: 'CENTRE_CONFIRMED_ELIGIBLE',
     preferred_blood_centre_id: 'bc_guntur',
     donations_count: 8,
     created_at: '2026-01-11T13:20:00Z',
@@ -407,7 +504,7 @@ export const MOCK_DONORS: Donor[] = [
   {
     id: 'dn_11_swathi',
     user_id: 'usr_donor_swathi',
-    name: 'Swathi P.',
+    name: 'DEMO_Swathi P.',
     phone: '+91 95544 •••••',
     blood_group: 'O+',
     gender: 'FEMALE',
@@ -416,7 +513,8 @@ export const MOCK_DONORS: Donor[] = [
     approximate_distance_km: 18.2,
     availability: true,
     last_donation_date: '2026-04-20',
-    eligibility_status: 'ELIGIBLE',
+    account_status: 'ACTIVE',
+    eligibility_status: 'CENTRE_CONFIRMED_ELIGIBLE',
     preferred_blood_centre_id: 'bc_guntur',
     donations_count: 3,
     created_at: '2026-01-18T15:10:00Z',
@@ -424,7 +522,7 @@ export const MOCK_DONORS: Donor[] = [
   {
     id: 'dn_12_ramesh',
     user_id: 'usr_donor_ramesh',
-    name: 'Ramesh Babu',
+    name: 'DEMO_Ramesh Babu',
     phone: '+91 94433 •••••',
     blood_group: 'AB+',
     gender: 'MALE',
@@ -433,7 +531,8 @@ export const MOCK_DONORS: Donor[] = [
     approximate_distance_km: 16.0,
     availability: true,
     last_donation_date: '2026-05-02',
-    eligibility_status: 'ELIGIBLE',
+    account_status: 'ACTIVE',
+    eligibility_status: 'CENTRE_CONFIRMED_ELIGIBLE',
     preferred_blood_centre_id: 'bc_guntur',
     donations_count: 7,
     created_at: '2026-01-22T11:00:00Z',
@@ -443,7 +542,7 @@ export const MOCK_DONORS: Donor[] = [
   {
     id: 'dn_13_prasad',
     user_id: 'usr_donor_prasad',
-    name: 'Prasad V.',
+    name: 'DEMO_Prasad V.',
     phone: '+91 93322 •••••',
     blood_group: 'O+',
     gender: 'MALE',
@@ -452,7 +551,8 @@ export const MOCK_DONORS: Donor[] = [
     approximate_distance_km: 26.5,
     availability: true,
     last_donation_date: '2026-03-30',
-    eligibility_status: 'ELIGIBLE',
+    account_status: 'ACTIVE',
+    eligibility_status: 'CENTRE_CONFIRMED_ELIGIBLE',
     preferred_blood_centre_id: 'bc_guntur',
     donations_count: 5,
     created_at: '2026-02-12T09:00:00Z',
@@ -460,7 +560,7 @@ export const MOCK_DONORS: Donor[] = [
   {
     id: 'dn_14_kavitha',
     user_id: 'usr_donor_kavitha',
-    name: 'Kavitha R.',
+    name: 'DEMO_Kavitha R.',
     phone: '+91 92211 •••••',
     blood_group: 'O+',
     gender: 'FEMALE',
@@ -469,14 +569,15 @@ export const MOCK_DONORS: Donor[] = [
     approximate_distance_km: 28.1,
     availability: true,
     last_donation_date: '2026-02-18',
-    eligibility_status: 'ELIGIBLE',
+    account_status: 'ACTIVE',
+    eligibility_status: 'CENTRE_CONFIRMED_ELIGIBLE',
     preferred_blood_centre_id: 'bc_guntur',
     donations_count: 2,
     created_at: '2026-02-15T10:00:00Z',
   }
 ];
 
-// Initial canonical demo request representing Section 59
+// Initial canonical demo request representing Section 59 with full v3 fields (§9, §33, §35, §45)
 export const INITIAL_DEMO_REQUEST: BloodRequest = {
   id: 'LL-2026-000184',
   hospital_id: 'hosp_lifelink_gen',
@@ -485,17 +586,22 @@ export const INITIAL_DEMO_REQUEST: BloodRequest = {
   blood_group: 'O+',
   units_required: 5,
   urgency: 'CRITICAL',
-  status: 'INVENTORY_SHORTAGE', // 3 units found, 2 shortage -> mobilisation active
+  status: 'INVENTORY_SHORTAGE',
   created_at: new Date(Date.now() - 42 * 60 * 1000).toISOString(),
   required_by: new Date(Date.now() + 2 * 60 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  expires_at: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(),
+  department: 'Trauma ICU (Bed 04)',
   hospital_department: 'Trauma ICU (Bed 04)',
+  request_reason: 'Mass Casualty / Acute Trauma Haemorrhage',
   reason_category: 'Mass Casualty / Acute Trauma Haemorrhage',
   contact_person: 'Dr. Anita Desai (Emergency Chief)',
+  contact_number: '+91 8647 222333',
   contact_phone: '+91 8647 222333',
+  operational_notes: 'Patient stabilized post-accident, active capillary bleed. Cross-match specimen sent to blood centre.',
   clinical_notes: 'Patient stabilized post-accident, active capillary bleed. Cross-match specimen sent to blood centre.',
-  inventory_found_units: 3, // 2 at Narasaraopet, 1 at Guntur
-  inventory_reserved_units: 2,
   units_fulfilled: 2,
+  inventory_found_units: 3,
+  inventory_reserved_units: 2,
   shortage_units: 2,
   donor_mobilisation_active: true,
   notified_donors_count: 12,
@@ -504,13 +610,13 @@ export const INITIAL_DEMO_REQUEST: BloodRequest = {
   completed_donations_count: 0,
 };
 
-// Initial audit trail events
+// Initial audit trail events (§39, §45)
 export const INITIAL_AUDIT_LOGS: AuditLog[] = [
   {
     id: 'aud_001',
     actor_id: 'usr_hosp_1',
     actor_name: 'Dr. Anita Desai',
-    actor_role: 'HOSPITAL_STAFF',
+    actor_role: 'HOSPITAL_STAFF (REQUESTER)',
     entity_type: 'REQUEST',
     entity_id: 'LL-2026-000184',
     action: 'CREATED_EMERGENCY_REQUEST',
@@ -547,7 +653,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
   {
     id: 'aud_004',
     actor_id: 'usr_donor_ravi',
-    actor_name: 'Ravi Kumar (Donor)',
+    actor_name: 'DEMO_Ravi Kumar (Donor)',
     actor_role: 'DONOR',
     entity_type: 'DONOR',
     entity_id: 'dn_01_ravi',
@@ -560,7 +666,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
   {
     id: 'aud_005',
     actor_id: 'usr_donor_priya',
-    actor_name: 'Priya Sharma (Donor)',
+    actor_name: 'DEMO_Priya Sharma (Donor)',
     actor_role: 'DONOR',
     entity_type: 'DONOR',
     entity_id: 'dn_02_priya',

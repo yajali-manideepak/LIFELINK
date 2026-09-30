@@ -169,8 +169,8 @@ export const Header: React.FC = () => {
             >
               {allUsers.map(u => (
                 <option key={u.id} value={u.id}>
-                  {u.role === 'HOSPITAL_STAFF' ? '🏥 ' : u.role === 'DONOR' ? '🩸 ' : '🧪 '}
-                  {u.name} ({u.role.replace('_', ' ')})
+                  {u.role === 'HOSPITAL_STAFF' ? '🏥 ' : u.role === 'DONOR' ? '🩸 ' : u.role === 'PLATFORM_ADMIN' ? '🛡️ ' : '🧪 '}
+                  {u.name} ({u.role.replace(/_/g, ' ')})
                 </option>
               ))}
             </select>

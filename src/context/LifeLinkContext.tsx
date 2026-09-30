@@ -126,44 +126,51 @@ export const LifeLinkProvider: React.FC<{ children: ReactNode }> = ({ children }
       id: 'notif_001',
       request_id: 'LL-2026-000184',
       donor_id: 'dn_01_ravi',
-      donor_name: 'Ravi Kumar',
+      donor_name: 'DEMO_Ravi Kumar',
       blood_group: 'O+',
       distance_km: 2.3,
       tier: 1,
       notification_status: 'ARRIVED_AT_CENTRE',
+      delivery_status: 'DELIVERED',
       sent_at: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
       responded_at: new Date(Date.now() - 36 * 60 * 1000).toISOString(),
       blood_centre_id: 'bc_narasaraopet',
       blood_centre_name: 'Narasaraopet Blood Centre',
+      selected_blood_centre_id: 'bc_narasaraopet',
       expected_arrival_time: '15 mins'
     },
     {
       id: 'notif_002',
       request_id: 'LL-2026-000184',
       donor_id: 'dn_02_priya',
-      donor_name: 'Priya Sharma',
+      donor_name: 'DEMO_Priya Sharma',
       blood_group: 'O+',
       distance_km: 3.4,
       tier: 1,
       notification_status: 'ACCEPTED',
+      delivery_status: 'DELIVERED',
       sent_at: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
       responded_at: new Date(Date.now() - 34 * 60 * 1000).toISOString(),
       blood_centre_id: 'bc_narasaraopet',
       blood_centre_name: 'Narasaraopet Blood Centre',
+      selected_blood_centre_id: 'bc_narasaraopet',
       expected_arrival_time: '25 mins'
     },
     {
       id: 'notif_003',
       request_id: 'LL-2026-000184',
       donor_id: 'dn_03_karthik',
-      donor_name: 'Karthik Reddy',
+      donor_name: 'DEMO_Karthik Reddy',
       blood_group: 'O+',
       distance_km: 4.1,
       tier: 1,
       notification_status: 'SENT',
+      delivery_status: 'SENT',
       sent_at: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
       blood_centre_id: 'bc_narasaraopet',
-      blood_centre_name: 'Narasaraopet Blood Centre'
+      blood_centre_name: 'Narasaraopet Blood Centre',
+      selected_blood_centre_id: null,
+      expected_arrival_time: null
     }
   ]);
 
@@ -297,10 +304,15 @@ export const LifeLinkProvider: React.FC<{ children: ReactNode }> = ({ children }
       status: initialStatus,
       created_at: new Date().toISOString(),
       required_by: data.required_by,
+      expires_at: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(),
+      department: data.hospital_department,
       hospital_department: data.hospital_department,
+      request_reason: data.reason_category,
       reason_category: data.reason_category,
       contact_person: data.contact_person,
+      contact_number: data.contact_phone,
       contact_phone: data.contact_phone,
+      operational_notes: data.clinical_notes,
       clinical_notes: data.clinical_notes,
       inventory_found_units: searchRes.totalAvailableUnits,
       inventory_reserved_units: 0,
@@ -363,9 +375,12 @@ export const LifeLinkProvider: React.FC<{ children: ReactNode }> = ({ children }
       distance_km: d.approximate_distance_km,
       tier,
       notification_status: 'SENT',
+      delivery_status: 'SENT',
       sent_at: new Date().toISOString(),
       blood_centre_id: 'bc_narasaraopet',
-      blood_centre_name: 'Narasaraopet Blood Centre'
+      blood_centre_name: 'Narasaraopet Blood Centre',
+      selected_blood_centre_id: null,
+      expected_arrival_time: null
     }));
 
     setDonorNotifications(prev => [...newNotifications, ...prev]);
@@ -421,6 +436,7 @@ export const LifeLinkProvider: React.FC<{ children: ReactNode }> = ({ children }
         return {
           ...inv,
           reserved_units: inv.reserved_units + unitsToReserve,
+          version: (inv.version || 1) + 1,
           last_updated: new Date().toISOString()
         };
       }
@@ -439,10 +455,12 @@ export const LifeLinkProvider: React.FC<{ children: ReactNode }> = ({ children }
       return r;
     }));
 
-    logAudit('INVENTORY_RESERVED', 'INVENTORY', inventoryId, 'AVAILABLE', 'RESERVED', {
+    logAudit('RESERVATION_REQUESTED', 'INVENTORY', inventoryId, 'AVAILABLE', 'RESERVED', {
       requestId,
       unitsReserved: unitsToReserve,
-      remainingAvailable: available - unitsToReserve
+      remainingAvailable: available - unitsToReserve,
+      version: (item.version || 1) + 1,
+      softLockActive: true
     });
 
     showToast('Inventory Reserved', `${unitsToReserve} unit(s) reserved at ${item.blood_centre_name}.`, 'success');
@@ -642,6 +660,7 @@ export const LifeLinkProvider: React.FC<{ children: ReactNode }> = ({ children }
         blood_group: 'O+', // from donor
         units: unitsCreated,
         reserved_units: 0,
+        version: 1,
         collection_date: new Date().toISOString(),
         expiry_date: expiry,
         storage_condition: storageCond,
