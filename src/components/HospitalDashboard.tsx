@@ -78,11 +78,11 @@ export const HospitalDashboard: React.FC = () => {
     setIsCreateModalOpen(true);
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    const result = createEmergencyRequest({
+    const result = await createEmergencyRequest({
       blood_group: bloodGroup,
       component_type: componentType,
       units_required: Number(unitsRequired),
@@ -102,7 +102,7 @@ export const HospitalDashboard: React.FC = () => {
 
     if (result.isDuplicateWarning) {
       setDuplicateWarning('Notice: A similar active request exists for this component and blood group. The request was created with full audit traceability.');
-    } else {
+    } else if (result.success) {
       setIsCreateModalOpen(false);
     }
   };
@@ -197,8 +197,8 @@ export const HospitalDashboard: React.FC = () => {
             ) : (
               filteredRequests.map(req => {
                 const isSelected = req.id === currentReq?.id;
-                const isFulfilled = req.status === 'FULFILLED';
-                const isCancelled = req.status === 'CANCELLED';
+                const isFulfilled = req.status === 'FULFILLED' || req.status === 'FULFILMENT_CONFIRMED_BY_CENTRE';
+                const isCancelled = req.status === 'CANCELLED' || req.status === 'CANCELLED_BY_HOSPITAL';
 
                 return (
                   <div
@@ -416,7 +416,7 @@ export const HospitalDashboard: React.FC = () => {
 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <button
-                              onClick={() => reserveInventoryForRequest(m.inventoryItem.id, currentReq.id, 1)}
+                              onClick={() => { void reserveInventoryForRequest(m.inventoryItem.id, currentReq.id, 1); }}
                               disabled={m.availableUnits <= 0}
                               className="btn btn-secondary btn-sm"
                               style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}
@@ -732,7 +732,7 @@ export const HospitalDashboard: React.FC = () => {
               </button>
               <button
                 onClick={() => {
-                  cancelRequest(cancellingRequestId, cancelReason);
+                  void cancelRequest(cancellingRequestId, cancelReason);
                   setCancellingRequestId(null);
                 }}
                 className="btn btn-emergency btn-sm"

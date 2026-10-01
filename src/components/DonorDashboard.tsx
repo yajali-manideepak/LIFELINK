@@ -87,7 +87,7 @@ export const DonorDashboard: React.FC = () => {
                 </strong>
               </div>
               <button
-                onClick={() => toggleDonorAvailability(currentDonor.id)}
+                onClick={() => void toggleDonorAvailability(currentDonor.id)}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -214,14 +214,14 @@ export const DonorDashboard: React.FC = () => {
 
                         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                           <button
-                            onClick={() => respondToDonorRequest(notif.id, 'ACCEPT', etaMinutes)}
+                            onClick={() => void respondToDonorRequest(notif.id, 'ACCEPT', etaMinutes)}
                             className="btn btn-emergency"
                             style={{ flex: 1, fontWeight: 700 }}
                           >
                             I'M WILLING TO DONATE
                           </button>
                           <button
-                            onClick={() => respondToDonorRequest(notif.id, 'DECLINE')}
+                            onClick={() => void respondToDonorRequest(notif.id, 'DECLINE')}
                             className="btn btn-secondary"
                             style={{ color: 'var(--text-muted)' }}
                           >

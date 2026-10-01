@@ -23,15 +23,16 @@ export const FailureSandbox: React.FC = () => {
   } = useLifeLink();
 
   const handleTestConcurrency = () => {
-    // Attempt double-reservation to trigger concurrency guard
+    // Attempt over-reservation to trigger the concurrency guard (§31/§32)
     if (!activeRequest) return;
-    const res = reserveInventoryForRequest('inv_nara_prbc_o_pos_1', activeRequest.id, 99);
-    alert(res.message);
+    void reserveInventoryForRequest('inv_nara_prbc_o_pos_1', activeRequest.id, 99).then(res => {
+      window.alert(res.message);
+    });
   };
 
   const handleSimulateDonorDeferral = () => {
     if (!activeRequest) return;
-    recordDonorScreening('dn_01_ravi', 'bc_narasaraopet', activeRequest.id, 'DEFERRED', 'Low Hemoglobin (11.8 g/dL)');
+    void recordDonorScreening('dn_01_ravi', 'bc_narasaraopet', activeRequest.id, 'DEFERRED', 'Low Hemoglobin (11.8 g/dL)');
   };
 
   return (

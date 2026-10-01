@@ -5,8 +5,34 @@ import {
   BloodCentre,
   Donor,
   BloodRequest,
-  RequestInventorySearchResult
+  RequestInventorySearchResult,
+  RequestStatus
 } from '../types/lifelink';
+
+/** Terminal request states (§5, §27, §35). Frozen once reached. */
+export const TERMINAL_REQUEST_STATES: RequestStatus[] = [
+  'FULFILLED',
+  'FULFILMENT_CONFIRMED_BY_CENTRE',
+  'CANCELLED',
+  'CANCELLED_BY_HOSPITAL',
+  'EXPIRED',
+  'CLOSED_OTHER_REASON'
+];
+
+export function isTerminalRequestState(status: RequestStatus): boolean {
+  return TERMINAL_REQUEST_STATES.includes(status);
+}
+
+/** Lifecycle transition when a request's fulfilled unit count changes (§33). */
+export function nextStatusAfterUnitsChange(
+  current: RequestStatus,
+  unitsFulfilled: number,
+  unitsRequired: number
+): RequestStatus {
+  if (unitsFulfilled >= unitsRequired) return 'FULFILMENT_CONFIRMED_BY_CENTRE';
+  if (unitsFulfilled > 0) return 'PARTIALLY_FULFILLED';
+  return current;
+}
 
 export interface InventoryMatchResult {
   inventoryItem: BloodInventory;

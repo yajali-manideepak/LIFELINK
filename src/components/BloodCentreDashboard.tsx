@@ -240,7 +240,7 @@ export const BloodCentreDashboard: React.FC = () => {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                           {notif.notification_status === 'ACCEPTED' && (
                             <button
-                              onClick={() => confirmDonorArrivalAtCentre(notif.donor_id, activeCentre.id, notif.request_id)}
+                              onClick={() => void confirmDonorArrivalAtCentre(notif.donor_id, activeCentre.id, notif.request_id)}
                               className="btn btn-primary btn-sm"
                               style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}
                             >
@@ -366,7 +366,7 @@ export const BloodCentreDashboard: React.FC = () => {
                           <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right' }}>
                             <select
                               value={item.inventory_status}
-                              onChange={(e) => updateInventoryStatus(item.id, e.target.value as InventoryUnitStatus)}
+                              onChange={(e) => { void updateInventoryStatus(item.id, e.target.value as InventoryUnitStatus); }}
                               className="select"
                               style={{ width: 'auto', padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
                             >
@@ -435,13 +435,13 @@ export const BloodCentreDashboard: React.FC = () => {
                         {!isFulfilled ? (
                           <>
                             <button
-                              onClick={() => fulfilEmergencyUnits(req.id, activeCentre.id, 1)}
+                              onClick={() => void fulfilEmergencyUnits(req.id, activeCentre.id, 1)}
                               className="btn btn-secondary btn-sm"
                             >
                               Dispatch 1 Unit
                             </button>
                             <button
-                              onClick={() => fulfilEmergencyUnits(req.id, activeCentre.id, req.units_required - req.units_fulfilled)}
+                              onClick={() => void fulfilEmergencyUnits(req.id, activeCentre.id, req.units_required - req.units_fulfilled)}
                               className="btn btn-success btn-sm"
                               style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}
                             >
@@ -513,7 +513,7 @@ export const BloodCentreDashboard: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  recordDonorScreening(screeningModalDonor.donorId, activeCentre.id, screeningModalDonor.requestId, 'DEFERRED', deferralReason);
+                  void recordDonorScreening(screeningModalDonor.donorId, activeCentre.id, screeningModalDonor.requestId, 'DEFERRED', deferralReason);
                   setScreeningModalDonor(null);
                 }}
                 className="btn btn-secondary btn-sm"
@@ -529,7 +529,7 @@ export const BloodCentreDashboard: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    recordDonorScreening(screeningModalDonor.donorId, activeCentre.id, screeningModalDonor.requestId, 'PASSED');
+                    void recordDonorScreening(screeningModalDonor.donorId, activeCentre.id, screeningModalDonor.requestId, 'PASSED');
                     setScreeningModalDonor(null);
                   }}
                   className="btn btn-success btn-sm"
@@ -585,7 +585,7 @@ export const BloodCentreDashboard: React.FC = () => {
               </button>
               <button
                 onClick={() => {
-                  recordDonationEvent(collectionModalDonor.donorId, activeCentre.id, collectionModalDonor.requestId, collectionVolume, collectionType);
+                  void recordDonationEvent(collectionModalDonor.donorId, activeCentre.id, collectionModalDonor.requestId, collectionVolume, collectionType);
                   setCollectionModalDonor(null);
                 }}
                 className="btn btn-emergency btn-sm"
@@ -637,11 +637,10 @@ export const BloodCentreDashboard: React.FC = () => {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <button
-                type="button"
-                onClick={() => {
-                  processTestingAndInventory(testingModalEvent.donationId, 'REACTIVE', componentToCreate, 1);
-                  setTestingModalEvent(null);
-                }}
+                type="button"                  onClick={() => {
+                    void processTestingAndInventory(testingModalEvent.donationId, 'REACTIVE', componentToCreate, 1);
+                    setTestingModalEvent(null);
+                  }}
                 className="btn btn-secondary btn-sm"
                 style={{ color: '#fb7185' }}
               >
@@ -655,7 +654,7 @@ export const BloodCentreDashboard: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    processTestingAndInventory(testingModalEvent.donationId, 'CLEARED', componentToCreate, 1);
+                    void processTestingAndInventory(testingModalEvent.donationId, 'CLEARED', componentToCreate, 1);
                     setTestingModalEvent(null);
                   }}
                   className="btn btn-success btn-sm"
